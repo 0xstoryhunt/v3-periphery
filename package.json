@@ -4,7 +4,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "1.4.3",
+  "version": "1.0.0",
   "homepage": "https://storyhunt.xyz",
   "keywords": [
     "storyhunt",
@@ -28,10 +28,11 @@
     "node": ">=10"
   },
   "dependencies": {
+    "@0xstoryhunt/v3-core": "github:0xstoryhunt/v3-core",
     "@openzeppelin/contracts": "3.4.2-solc-0.7",
     "@uniswap/lib": "^4.0.1-alpha",
-    "@0xstoryhunt/v3-core": "github:0xstoryhunt/v3-core",
-    "base64-sol": "1.0.1"
+    "base64-sol": "1.0.1",
+    "web3": "^4.15.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.2",
@@ -42,7 +43,7 @@
     "@types/mocha": "^5.2.7",
     "chai": "^4.2.0",
     "decimal.js": "^10.2.1",
-    "ethereum-waffle": "^3.0.2",
+    "ethereum-waffle": "^4.0.10",
     "ethers": "^5.0.8",
     "hardhat": "^2.6.8",
     "hardhat-typechain": "^0.3.5",
