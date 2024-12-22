@@ -1,8 +1,9 @@
 import '@nomiclabs/hardhat-ethers'
-import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-waffle'
 import 'hardhat-typechain'
 import 'hardhat-watcher'
+import '@nomicfoundation/hardhat-verify'
+
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: '0.7.6',
@@ -79,18 +80,30 @@ export default {
       url: `https://optimism-mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
     },
     Odyssey: {
-      url: "https://odyssey.storyrpc.io",
+      url: "https://odyssey-evm.spidernode.net",
       chainId:  1516,
+      gasPrice: 100000000000
       },
        StoryTestnet: {
       url: "https://testnet.storyrpc.io",
       chainId:  1513,
+      gasPrice: 100000000000
       },
   },
   etherscan: {
-    // Your API key for Etherscan
-    // Obtain one at https://etherscan.io/
-    apiKey: process.env.ETHERSCAN_API_KEY,
+    apiKey: {
+      Odyssey: 'empty'
+    },
+    customChains: [
+      {
+        network: "Odyssey",
+        chainId: 1516,
+        urls: {
+          apiURL: "https://odyssey.storyscan.xyz/api",
+          browserURL: "https://odyssey.storyscan.xyz/"
+        }
+      }
+    ]
   },
   solidity: {
     compilers: [DEFAULT_COMPILER_SETTINGS],
