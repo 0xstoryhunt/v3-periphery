@@ -20,7 +20,7 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
 
     ISwapRouter public immutable swapRouter;
 
-    constructor(ISwapRouter _swapRouter, address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {
+    constructor(ISwapRouter _swapRouter, address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {
         swapRouter = _swapRouter;
     }
 

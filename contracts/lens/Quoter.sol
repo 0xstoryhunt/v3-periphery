@@ -24,7 +24,7 @@ contract Quoter is IQuoter, IStoryHuntV3SwapCallback, PeripheryImmutableState {
     /// @dev Transient storage variable used to check a safety condition in exact output swaps.
     uint256 private amountOutCached;
 
-    constructor(address _factory, address _WETH9) PeripheryImmutableState(_factory, _WETH9) {}
+    constructor(address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {}
 
     function getPool(address tokenA, address tokenB, uint24 fee) private view returns (IStoryHuntV3Pool) {
         return IStoryHuntV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));

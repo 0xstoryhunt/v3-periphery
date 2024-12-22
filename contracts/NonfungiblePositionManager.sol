@@ -70,9 +70,9 @@ contract NonfungiblePositionManager is
 
     constructor(
         address _factory,
-        address _WETH9,
+        address _WIP9,
         address _tokenDescriptor_
-    ) ERC721Permit('StoryHunt V3 Positions NFT-V1', 'STH-V3-POS', '1') PeripheryImmutableState(_factory, _WETH9) {
+    ) ERC721Permit('StoryHunt V3 Positions NFT-V1', 'STH-V3-POS', '1') PeripheryImmutableState(_factory, _WIP9) {
         _tokenDescriptor = _tokenDescriptor_;
     }
 
