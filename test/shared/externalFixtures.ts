@@ -4,17 +4,17 @@ import {
   } from '../contracts/StoryHuntV3Factory.json'
   import { Fixture } from 'ethereum-waffle'
   import { ethers, waffle } from 'hardhat'
-  import { IStoryHuntV3Factory, IWETH9, MockTimeSwapRouter } from '../../typechain'
+  import { IStoryHuntV3Factory, IWIP9, MockTimeSwapRouter } from '../../typechain'
   
-  import WETH9 from '../contracts/WETH9.json'
+  import WIP9 from '../contracts/WIP9.json'
   
-  const wethFixture: Fixture<{ weth9: IWETH9 }> = async ([wallet]) => {
-    const weth9 = (await waffle.deployContract(wallet, {
-      bytecode: WETH9.bytecode,
-      abi: WETH9.abi,
-    })) as IWETH9
+  const wipFixture: Fixture<{ wip9: IWIP9 }> = async ([wallet]) => {
+    const wip9 = (await waffle.deployContract(wallet, {
+      bytecode: WIP9.bytecode,
+      abi: WIP9.abi,
+    })) as IWIP9
   
-    return { weth9 }
+    return { wip9 }
   }
   
   const v3CoreFactoryFixture: Fixture<IStoryHuntV3Factory> = async ([wallet]) => {
@@ -25,20 +25,20 @@ import {
   }
   
   export const v3RouterFixture: Fixture<{
-    weth9: IWETH9;
+    wip9: IWIP9;
     factory: IStoryHuntV3Factory;
     router: MockTimeSwapRouter;
   }> = async ([wallet], provider) => {
-    const { weth9 } = await wethFixture([wallet], provider);
-    if (!weth9.address) throw new Error("WETH9 deployment failed");
+    const { wip9 } = await wipFixture([wallet], provider);
+    if (!wip9.address) throw new Error("WIP9 deployment failed");
   
     const factory = await v3CoreFactoryFixture([wallet], provider);
     if (!factory.address) throw new Error("Factory deployment failed");
   
-    const router = (await (await ethers.getContractFactory('MockTimeSwapRouter')).deploy(factory.address, weth9.address)) as MockTimeSwapRouter;
+    const router = (await (await ethers.getContractFactory('MockTimeSwapRouter')).deploy(factory.address, wip9.address)) as MockTimeSwapRouter;
     if (!router.address) throw new Error("Router deployment failed");
   
-    return { factory, weth9, router };
+    return { factory, wip9, router };
   };
   
   

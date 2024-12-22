@@ -4,7 +4,7 @@ import { BigNumberish, constants, Wallet } from 'ethers'
 import { ethers, waffle } from 'hardhat'
 import {
   IStoryHuntV3Factory,
-  IWETH9,
+  IWIP9,
   MockTimeNonfungiblePositionManager,
   NonfungiblePositionManagerPositionsGasTest,
   SwapRouter,
@@ -33,10 +33,10 @@ describe('NonfungiblePositionManager', () => {
     nft: MockTimeNonfungiblePositionManager
     factory: IStoryHuntV3Factory
     tokens: [TestERC20, TestERC20, TestERC20]
-    weth9: IWETH9
+    wip9: IWIP9
     router: SwapRouter
   }> = async (wallets, provider) => {
-    const { weth9, factory, tokens, nft, router } = await completeFixture(wallets, provider)
+    const { wip9, factory, tokens, nft, router } = await completeFixture(wallets, provider)
 
     // approve & fund wallets
     for (const token of tokens) {
@@ -49,7 +49,7 @@ describe('NonfungiblePositionManager', () => {
       nft,
       factory,
       tokens,
-      weth9,
+      wip9,
       router,
     }
   }
@@ -57,7 +57,7 @@ describe('NonfungiblePositionManager', () => {
   let factory: IStoryHuntV3Factory
   let nft: MockTimeNonfungiblePositionManager
   let tokens: [TestERC20, TestERC20, TestERC20]
-  let weth9: IWETH9
+  let wip9: IWIP9
   let router: SwapRouter
 
   let loadFixture: ReturnType<typeof waffle.createFixtureLoader>
@@ -70,7 +70,7 @@ describe('NonfungiblePositionManager', () => {
   })
 
   beforeEach('load fixture', async () => {
-    ;({ nft, factory, tokens, weth9, router } = await loadFixture(nftFixture))
+    ;({ nft, factory, tokens, wip9, router } = await loadFixture(nftFixture))
   })
 
   it('bytecode size', async () => {
@@ -143,8 +143,8 @@ describe('NonfungiblePositionManager', () => {
       )
     })
 
-    it('could theoretically use eth via multicall', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[0])
+    it('could theoretically use ip via multicall', async () => {
+      const [token0, token1] = sortedTokens(wip9, tokens[0])
 
       const createAndInitializePoolIfNecessaryData = nft.interface.encodeFunctionData(
         'createAndInitializePoolIfNecessary',
@@ -257,11 +257,11 @@ describe('NonfungiblePositionManager', () => {
       expect(feeGrowthInside1LastX128).to.eq(0)
     })
 
-    it('can use eth via multicall', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[0])
+    it('can use ip via multicall', async () => {
+      const [token0, token1] = sortedTokens(wip9, tokens[0])
 
       // remove any approval
-      await weth9.approve(nft.address, 0)
+      await wip9.approve(nft.address, 0)
 
       const createAndInitializeData = nft.interface.encodeFunctionData('createAndInitializePoolIfNecessary', [
         token0.address,
@@ -286,10 +286,10 @@ describe('NonfungiblePositionManager', () => {
         },
       ])
 
-      const refundETHData = nft.interface.encodeFunctionData('refundETH')
+      const refundIPData = nft.interface.encodeFunctionData('refundIP')
 
       const balanceBefore = await wallet.getBalance()
-      const tx = await nft.multicall([createAndInitializeData, mintData, refundETHData], {
+      const tx = await nft.multicall([createAndInitializeData, mintData, refundIPData], {
         value: expandTo18Decimals(1),
       })
       const receipt = await tx.wait()
@@ -324,8 +324,8 @@ describe('NonfungiblePositionManager', () => {
       )
     })
 
-    it('gas first mint for pool using eth with zero refund', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[0])
+    it('gas first mint for pool using ip with zero refund', async () => {
+      const [token0, token1] = sortedTokens(wip9, tokens[0])
       await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
@@ -351,15 +351,15 @@ describe('NonfungiblePositionManager', () => {
                 deadline: 10,
               },
             ]),
-            nft.interface.encodeFunctionData('refundETH'),
+            nft.interface.encodeFunctionData('refundIP'),
           ],
           { value: 100 }
         )
       )
     })
 
-    it('gas first mint for pool using eth with non-zero refund', async () => {
-      const [token0, token1] = sortedTokens(weth9, tokens[0])
+    it('gas first mint for pool using ip with non-zero refund', async () => {
+      const [token0, token1] = sortedTokens(wip9, tokens[0])
       await nft.createAndInitializePoolIfNecessary(
         token0.address,
         token1.address,
@@ -385,7 +385,7 @@ describe('NonfungiblePositionManager', () => {
                 deadline: 10,
               },
             ]),
-            nft.interface.encodeFunctionData('refundETH'),
+            nft.interface.encodeFunctionData('refundIP'),
           ],
           { value: 1000 }
         )
@@ -511,8 +511,8 @@ describe('NonfungiblePositionManager', () => {
 
     it('emits an event')
 
-    it('can be paid with ETH', async () => {
-      const [token0, token1] = sortedTokens(tokens[0], weth9)
+    it('can be paid with IP', async () => {
+      const [token0, token1] = sortedTokens(tokens[0], wip9)
 
       const tokenId = 1
 
@@ -538,8 +538,8 @@ describe('NonfungiblePositionManager', () => {
           deadline: 1,
         },
       ])
-      const refundETHData = nft.interface.encodeFunctionData('unwrapWETH9', [0, other.address])
-      await nft.multicall([mintData, refundETHData], { value: expandTo18Decimals(1) })
+      const refundIPData = nft.interface.encodeFunctionData('unwrapWIP9', [0, other.address])
+      await nft.multicall([mintData, refundIPData], { value: expandTo18Decimals(1) })
 
       const increaseLiquidityData = nft.interface.encodeFunctionData('increaseLiquidity', [
         {
@@ -551,7 +551,7 @@ describe('NonfungiblePositionManager', () => {
           deadline: 1,
         },
       ])
-      await nft.multicall([increaseLiquidityData, refundETHData], { value: expandTo18Decimals(1) })
+      await nft.multicall([increaseLiquidityData, refundIPData], { value: expandTo18Decimals(1) })
     })
 
     it('gas', async () => {
