@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@0xstoryhunt/v3-core@github:0xstoryhunt/v3-core":
+"@0xstoryhunt/v3-core@github:0xstoryhunt/v3-core#51e91cbbaba29da9ac4a5ebe9ba5158a5c83e1b7":
   version "1.0.0"
-  resolved "https://codeload.github.com/0xstoryhunt/v3-core/tar.gz/37f4eb0c0a6c1e33a4f73f83503aa599c45df33c"
+  resolved "git+ssh://git@github.com/0xstoryhunt/v3-core.git#51e91cbbaba29da9ac4a5ebe9ba5158a5c83e1b7"
   dependencies:
     "@nomicfoundation/hardhat-verify" "^2.0.12"
 

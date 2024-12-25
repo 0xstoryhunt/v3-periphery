@@ -28,7 +28,7 @@
     "node": ">=10"
   },
   "dependencies": {
-    "@0xstoryhunt/v3-core": "github:0xstoryhunt/v3-core",
+    "@0xstoryhunt/v3-core": "github:0xstoryhunt/v3-core#51e91cbbaba29da9ac4a5ebe9ba5158a5c83e1b7",
     "@openzeppelin/contracts": "3.4.2-solc-0.7",
     "@uniswap/lib": "^4.0.1-alpha",
     "base64-sol": "1.0.1",
