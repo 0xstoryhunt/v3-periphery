@@ -16,7 +16,7 @@ import './libraries/Path.sol';
 import './libraries/PoolAddress.sol';
 import './libraries/CallbackValidation.sol';
 import './interfaces/external/IWIP9.sol';
-
+import 'hardhat/console.sol';
 /// @title StoryHunt V3 Swap Router
 /// @notice Router for stateless execution of swaps against StoryHunt V3
 contract SwapRouter is
@@ -37,11 +37,11 @@ contract SwapRouter is
     /// @dev Transient storage variable used for returning the computed amount in for an exact output swap.
     uint256 private amountInCached = DEFAULT_AMOUNT_IN_CACHED;
 
-    constructor(address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {}
+    constructor(address _deployer, address _factory, address _WIP9) PeripheryImmutableState(_deployer, _factory, _WIP9) {}
 
     /// @dev Returns the pool for the given token pair and fee. The pool contract may or may not exist.
     function getPool(address tokenA, address tokenB, uint24 fee) private view returns (IStoryHuntV3Pool) {
-        return IStoryHuntV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
+        return IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
     }
 
     struct SwapCallbackData {
@@ -54,7 +54,7 @@ contract SwapRouter is
         require(amount0Delta > 0 || amount1Delta > 0); // swaps entirely within 0-liquidity regions are not supported
         SwapCallbackData memory data = abi.decode(_data, (SwapCallbackData));
         (address tokenIn, address tokenOut, uint24 fee) = data.path.decodeFirstPool();
-        CallbackValidation.verifyCallback(factory, tokenIn, tokenOut, fee);
+        CallbackValidation.verifyCallback(deployer, tokenIn, tokenOut, fee);
 
         (bool isExactInput, uint256 amountToPay) = amount0Delta > 0
             ? (tokenIn < tokenOut, uint256(amount0Delta))

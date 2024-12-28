@@ -69,10 +69,11 @@ contract NonfungiblePositionManager is
     address private immutable _tokenDescriptor;
 
     constructor(
+        address _deployer,
         address _factory,
         address _WIP9,
         address _tokenDescriptor_
-    ) ERC721Permit('StoryHunt V3 Positions NFT-V1', 'STH-V3-POS', '1') PeripheryImmutableState(_factory, _WIP9) {
+    ) ERC721Permit('StoryHunt V3 Positions NFT-V1', 'STH-V3-POS', '1') PeripheryImmutableState(_deployer, _factory, _WIP9) {
         _tokenDescriptor = _tokenDescriptor_;
     }
 
@@ -267,7 +268,7 @@ contract NonfungiblePositionManager is
         require(positionLiquidity >= params.liquidity);
 
         PoolAddress.PoolKey memory poolKey = _poolIdToPoolKey[position.poolId];
-        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
         (amount0, amount1) = pool.burn(position.tickLower, position.tickUpper, params.liquidity);
 
         require(amount0 >= params.amount0Min && amount1 >= params.amount1Min, 'Price slippage check');
@@ -315,7 +316,7 @@ contract NonfungiblePositionManager is
 
         PoolAddress.PoolKey memory poolKey = _poolIdToPoolKey[position.poolId];
 
-        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
 
         (uint128 tokensOwed0, uint128 tokensOwed1) = (position.tokensOwed0, position.tokensOwed1);
 
