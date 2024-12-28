@@ -119,7 +119,7 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
             token1: params.token1,
             fee: params.fee1
         });
-        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
         // recipient of borrowed amounts
         // amount of token0 requested to borrow
         // amount of token1 requested to borrow

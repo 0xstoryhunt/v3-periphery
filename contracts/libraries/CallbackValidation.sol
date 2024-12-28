@@ -22,14 +22,14 @@ library CallbackValidation {
     }
 
     /// @notice Returns the address of a valid StoryHunt V3 Pool
-    /// @param factory The contract address of the StoryHunt V3 factory
+    /// @param deployer The contract address of the StoryHunt V3 deployer
     /// @param poolKey The identifying key of the V3 pool
     /// @return pool The V3 pool contract address
     function verifyCallback(
-        address factory,
+        address deployer,
         PoolAddress.PoolKey memory poolKey
     ) internal view returns (IStoryHuntV3Pool pool) {
-        pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
         require(msg.sender == address(pool));
     }
 }

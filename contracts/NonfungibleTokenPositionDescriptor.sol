@@ -54,7 +54,7 @@ contract NonfungibleTokenPositionDescriptor is INonfungibleTokenPositionDescript
 
         IStoryHuntV3Pool pool = IStoryHuntV3Pool(
             PoolAddress.computeAddress(
-                positionManager.factory(),
+                positionManager.deployer(),
                 PoolAddress.PoolKey({token0: token0, token1: token1, fee: fee})
             )
         );

@@ -32,7 +32,7 @@ contract QuoterV2 is IQuoterV2, IStoryHuntV3SwapCallback, PeripheryImmutableStat
     {}
 
     function getPool(address tokenA, address tokenB, uint24 fee) private view returns (IStoryHuntV3Pool) {
-        return IStoryHuntV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
+        return IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
     }
 
     /// @inheritdoc IStoryHuntV3SwapCallback
