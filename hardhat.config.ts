@@ -1,51 +1,64 @@
-import '@nomiclabs/hardhat-ethers'
-import '@nomiclabs/hardhat-waffle'
-import 'hardhat-typechain'
-import 'hardhat-watcher'
-import '@nomicfoundation/hardhat-verify'
-
+import "@nomiclabs/hardhat-ethers";
+import "@nomiclabs/hardhat-waffle";
+import "hardhat-typechain";
+import "hardhat-watcher";
+import "@nomicfoundation/hardhat-verify";
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
-  version: '0.7.6',
+  version: "0.7.6",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 2_000,
     },
     metadata: {
-      bytecodeHash: 'none',
+      bytecodeHash: "none",
     },
   },
-}
+};
 
 const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
-  version: '0.7.6',
+  version: "0.7.6",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 1_000,
     },
     metadata: {
-      bytecodeHash: 'none',
+      bytecodeHash: "none",
     },
   },
-}
+};
+
+const DEBUG_OPTIMIZER_COMPILER_SETTINGS = {
+  version: "0.7.6",
+  settings: {
+    evmVersion: "istanbul",
+    optimizer: {
+      enabled: true,
+      runs: 200,
+    },
+    metadata: {
+      bytecodeHash: "none",
+    },
+  },
+};
 
 const DEFAULT_COMPILER_SETTINGS = {
-  version: '0.7.6',
+  version: "0.7.6",
   settings: {
-    evmVersion: 'istanbul',
+    evmVersion: "istanbul",
     optimizer: {
       enabled: true,
       runs: 1_000_000,
     },
     metadata: {
-      bytecodeHash: 'none',
+      bytecodeHash: "none",
     },
   },
-}
+};
 
 export default {
   networks: {
@@ -81,18 +94,18 @@ export default {
     },
     Odyssey: {
       url: "https://odyssey-evm.spidernode.net",
-      chainId:  1516,
-      gasPrice: 100000000000
-      },
-       StoryTestnet: {
+      chainId: 1516,
+      gasPrice: 100000000000,
+    },
+    StoryTestnet: {
       url: "https://testnet.storyrpc.io",
-      chainId:  1513,
-      gasPrice: 100000000000
-      },
+      chainId: 1513,
+      gasPrice: 100000000000,
+    },
   },
   etherscan: {
     apiKey: {
-      Odyssey: 'empty'
+      Odyssey: "empty",
     },
     customChains: [
       {
@@ -100,26 +113,31 @@ export default {
         chainId: 1516,
         urls: {
           apiURL: "https://odyssey.storyscan.xyz/api",
-          browserURL: "https://odyssey.storyscan.xyz/"
-        }
-      }
-    ]
+          browserURL: "https://odyssey.storyscan.xyz/",
+        },
+      },
+    ],
   },
   solidity: {
     compilers: [DEFAULT_COMPILER_SETTINGS],
     overrides: {
-      'contracts/NonfungiblePositionManager.sol': LOW_OPTIMIZER_COMPILER_SETTINGS,
-      'contracts/test/MockTimeNonfungiblePositionManager.sol': LOW_OPTIMIZER_COMPILER_SETTINGS,
-      'contracts/test/NFTDescriptorTest.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
-      'contracts/NonfungibleTokenPositionDescriptor.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
-      'contracts/libraries/NFTDescriptor.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/NonfungiblePositionManager.sol":
+        DEBUG_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/test/MockTimeNonfungiblePositionManager.sol":
+        DEBUG_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/test/NFTDescriptorTest.sol":
+        LOWEST_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/NonfungibleTokenPositionDescriptor.sol":
+        LOWEST_OPTIMIZER_COMPILER_SETTINGS,
+      "contracts/libraries/NFTDescriptor.sol":
+        LOWEST_OPTIMIZER_COMPILER_SETTINGS,
     },
   },
   watcher: {
     test: {
-      tasks: [{ command: 'test', params: { testFiles: ['{path}'] } }],
-      files: ['./test/**/*'],
+      tasks: [{ command: "test", params: { testFiles: ["{path}"] } }],
+      files: ["./test/**/*"],
       verbose: true,
     },
   },
-}
+};
