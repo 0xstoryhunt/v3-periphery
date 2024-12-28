@@ -189,6 +189,7 @@ contract NonfungiblePositionManager is
                 fee: params.fee
             })
         );
+        console.log("poolId", poolId);
 
         _positions[tokenId] = Position({
             nonce: 0,
