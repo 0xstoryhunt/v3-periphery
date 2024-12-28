@@ -16,7 +16,6 @@ import './libraries/Path.sol';
 import './libraries/PoolAddress.sol';
 import './libraries/CallbackValidation.sol';
 import './interfaces/external/IWIP9.sol';
-import 'hardhat/console.sol';
 /// @title StoryHunt V3 Swap Router
 /// @notice Router for stateless execution of swaps against StoryHunt V3
 contract SwapRouter is
