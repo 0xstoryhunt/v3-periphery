@@ -17,7 +17,6 @@ import "./base/ERC721Permit.sol";
 import "./base/PeripheryValidation.sol";
 import "./base/SelfPermit.sol";
 import "./base/PoolInitializer.sol";
-import "hardhat/console.sol";
 
 /// @title NFT positions
 /// @notice Wraps StoryHunt V3 positions in the ERC721 non-fungible token interface
@@ -189,7 +188,6 @@ contract NonfungiblePositionManager is
                 fee: params.fee
             })
         );
-        console.log("poolId", poolId);
 
         _positions[tokenId] = Position({
             nonce: 0,

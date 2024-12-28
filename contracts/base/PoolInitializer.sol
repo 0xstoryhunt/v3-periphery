@@ -6,7 +6,6 @@ import "@0xstoryhunt/v3-core/contracts/interfaces/IStoryHuntV3Pool.sol";
 
 import "./PeripheryImmutableState.sol";
 import "../interfaces/IPoolInitializer.sol";
-import "hardhat/console.sol";
 
 /// @title Creates and initializes V3 Pools
 abstract contract PoolInitializer is IPoolInitializer, PeripheryImmutableState {
