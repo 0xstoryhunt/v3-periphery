@@ -47,18 +47,13 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
     function addLiquidity(
         AddLiquidityParams memory params
     ) internal returns (uint128 liquidity, uint256 amount0, uint256 amount1, IStoryHuntV3Pool pool) {
-        console.log("addLiquidity");
         PoolAddress.PoolKey memory poolKey = PoolAddress.PoolKey({
             token0: params.token0,
             token1: params.token1,
             fee: params.fee
         });
 
-        console.log("token0", params.token0);
-        console.log("token1", params.token1);
-        console.log("fee", params.fee);
         pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
-        console.log("pool", address(pool));
         // compute the liquidity amount
         {
             (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
@@ -74,7 +69,6 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
             );
         }
 
-        console.log("minting..");
         (amount0, amount1) = pool.mint(
             params.recipient,
             params.tickLower,
@@ -82,7 +76,6 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
             liquidity,
             abi.encode(MintCallbackData({poolKey: poolKey, payer: msg.sender}))
         );
-        console.log("83: minted");
         require(amount0 >= params.amount0Min && amount1 >= params.amount1Min, 'Price slippage check');
     }
 }

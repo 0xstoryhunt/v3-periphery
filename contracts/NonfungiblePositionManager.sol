@@ -149,7 +149,6 @@ contract NonfungiblePositionManager is
             uint256 amount1
         )
     {
-        console.log("try mint..");
         IStoryHuntV3Pool pool;
         (liquidity, amount0, amount1, pool) = addLiquidity(
             AddLiquidityParams({
@@ -167,7 +166,6 @@ contract NonfungiblePositionManager is
         );
 
         _mint(params.recipient, (tokenId = _nextId++));
-        console.log("minted");
 
         bytes32 positionKey = PositionKey.compute(
             address(this),

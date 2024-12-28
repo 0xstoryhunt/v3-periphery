@@ -19,24 +19,15 @@ abstract contract PoolInitializer is IPoolInitializer, PeripheryImmutableState {
     ) external payable override returns (address pool) {
         require(token0 < token1);
         pool = IStoryHuntV3Factory(factory).getPool(token0, token1, fee);
-        console.log("PoolInitializer: pool", address(pool));
-        console.log("PoolInitializer: token0", token0);
-        console.log("PoolInitializer: token1", token1);
-        console.log("PoolInitializer: fee", fee);
 
         if (pool == address(0)) {
-            console.log("PoolInitializer: creating pool");
             pool = IStoryHuntV3Factory(factory).createPool(token0, token1, fee);
-            console.log("PoolInitializer: pool created", address(pool));
             IStoryHuntV3Pool(pool).initialize(sqrtPriceX96);
-            console.log("PoolInitializer: pool initialized");
         } else {
             (uint160 sqrtPriceX96Existing, , , , , , ) = IStoryHuntV3Pool(pool)
                 .slot0();
             if (sqrtPriceX96Existing == 0) {
-                console.log("PoolInitializer: initializing pool");
                 IStoryHuntV3Pool(pool).initialize(sqrtPriceX96);
-                console.log("PoolInitializer: pool initialized");
             }
         }
     }
