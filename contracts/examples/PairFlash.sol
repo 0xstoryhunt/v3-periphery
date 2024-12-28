@@ -43,7 +43,7 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
     /// @dev fails if the flash is not profitable, meaning the amountOut from the flash is less than the amount borrowed
     function storyHuntV3FlashCallback(uint256 fee0, uint256 fee1, bytes calldata data) external override {
         FlashCallbackData memory decoded = abi.decode(data, (FlashCallbackData));
-        CallbackValidation.verifyCallback(factory, decoded.poolKey);
+        CallbackValidation.verifyCallback(deployer, decoded.poolKey);
 
         address token0 = decoded.poolKey.token0;
         address token1 = decoded.poolKey.token1;

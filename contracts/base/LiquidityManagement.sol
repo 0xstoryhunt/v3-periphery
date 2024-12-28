@@ -25,8 +25,7 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
     /// @inheritdoc IStoryHuntV3MintCallback
     function storyHuntV3MintCallback(uint256 amount0Owed, uint256 amount1Owed, bytes calldata data) external override {
         MintCallbackData memory decoded = abi.decode(data, (MintCallbackData));
-        CallbackValidation.verifyCallback(factory, decoded.poolKey);
-
+        CallbackValidation.verifyCallback(deployer, decoded.poolKey);
         if (amount0Owed > 0) pay(decoded.poolKey.token0, decoded.payer, msg.sender, amount0Owed);
         if (amount1Owed > 0) pay(decoded.poolKey.token1, decoded.payer, msg.sender, amount1Owed);
     }
