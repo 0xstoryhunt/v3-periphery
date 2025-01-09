@@ -24,8 +24,7 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
     /// @inheritdoc IStoryHuntV3MintCallback
     function storyHuntV3MintCallback(uint256 amount0Owed, uint256 amount1Owed, bytes calldata data) external override {
         MintCallbackData memory decoded = abi.decode(data, (MintCallbackData));
-        CallbackValidation.verifyCallback(factory, decoded.poolKey);
-
+        CallbackValidation.verifyCallback(deployer, decoded.poolKey);
         if (amount0Owed > 0) pay(decoded.poolKey.token0, decoded.payer, msg.sender, amount0Owed);
         if (amount1Owed > 0) pay(decoded.poolKey.token1, decoded.payer, msg.sender, amount1Owed);
     }
@@ -53,8 +52,7 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
             fee: params.fee
         });
 
-        pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
-
+        pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
         // compute the liquidity amount
         {
             (uint160 sqrtPriceX96, , , , , , ) = pool.slot0();
@@ -77,7 +75,6 @@ abstract contract LiquidityManagement is IStoryHuntV3MintCallback, PeripheryImmu
             liquidity,
             abi.encode(MintCallbackData({poolKey: poolKey, payer: msg.sender}))
         );
-
         require(amount0 >= params.amount0Min && amount1 >= params.amount1Min, 'Price slippage check');
     }
 }

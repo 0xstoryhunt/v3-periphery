@@ -24,10 +24,12 @@ contract Quoter is IQuoter, IStoryHuntV3SwapCallback, PeripheryImmutableState {
     /// @dev Transient storage variable used to check a safety condition in exact output swaps.
     uint256 private amountOutCached;
 
-    constructor(address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {}
+    constructor(address _deployer, address _factory, address _WIP9)
+        PeripheryImmutableState(_deployer, _factory, _WIP9)
+    {}
 
     function getPool(address tokenA, address tokenB, uint24 fee) private view returns (IStoryHuntV3Pool) {
-        return IStoryHuntV3Pool(PoolAddress.computeAddress(factory, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
+        return IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, PoolAddress.getPoolKey(tokenA, tokenB, fee)));
     }
 
     /// @inheritdoc IStoryHuntV3SwapCallback
@@ -38,7 +40,7 @@ contract Quoter is IQuoter, IStoryHuntV3SwapCallback, PeripheryImmutableState {
     ) external view override {
         require(amount0Delta > 0 || amount1Delta > 0); // swaps entirely within 0-liquidity regions are not supported
         (address tokenIn, address tokenOut, uint24 fee) = path.decodeFirstPool();
-        CallbackValidation.verifyCallback(factory, tokenIn, tokenOut, fee);
+        CallbackValidation.verifyCallback(deployer, tokenIn, tokenOut, fee);
 
         (bool isExactInput, uint256 amountToPay, uint256 amountReceived) = amount0Delta > 0
             ? (tokenIn < tokenOut, uint256(amount0Delta), uint256(-amount1Delta))

@@ -9,4 +9,7 @@ interface IPeripheryImmutableState {
 
     /// @return Returns the address of WIP9
     function WIP9() external view returns (address);
+
+    /// @return Returns the address of the deployer
+    function deployer() external view returns (address);
 }

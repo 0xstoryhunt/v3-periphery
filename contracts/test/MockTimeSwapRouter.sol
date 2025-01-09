@@ -7,7 +7,7 @@ import '../SwapRouter.sol';
 contract MockTimeSwapRouter is SwapRouter {
     uint256 time;
 
-    constructor(address _factory, address _WIP9) SwapRouter(_factory, _WIP9) {}
+    constructor(address _deployer, address _factory, address _WIP9) SwapRouter(_deployer, _factory, _WIP9) {}
 
     function _blockTimestamp() internal view override returns (uint256) {
         return time;
