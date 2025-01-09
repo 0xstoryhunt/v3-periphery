@@ -20,7 +20,9 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
 
     ISwapRouter public immutable swapRouter;
 
-    constructor(ISwapRouter _swapRouter, address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {
+    constructor(ISwapRouter _swapRouter, address _deployer, address _factory, address _WIP9)
+        PeripheryImmutableState(_deployer, _factory, _WIP9)
+    {
         swapRouter = _swapRouter;
     }
 
@@ -41,7 +43,7 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
     /// @dev fails if the flash is not profitable, meaning the amountOut from the flash is less than the amount borrowed
     function storyHuntV3FlashCallback(uint256 fee0, uint256 fee1, bytes calldata data) external override {
         FlashCallbackData memory decoded = abi.decode(data, (FlashCallbackData));
-        CallbackValidation.verifyCallback(factory, decoded.poolKey);
+        CallbackValidation.verifyCallback(deployer, decoded.poolKey);
 
         address token0 = decoded.poolKey.token0;
         address token1 = decoded.poolKey.token1;
@@ -117,7 +119,7 @@ contract PairFlash is IStoryHuntV3FlashCallback, PeripheryPayments {
             token1: params.token1,
             fee: params.fee1
         });
-        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(factory, poolKey));
+        IStoryHuntV3Pool pool = IStoryHuntV3Pool(PoolAddress.computeAddress(deployer, poolKey));
         // recipient of borrowed amounts
         // amount of token0 requested to borrow
         // amount of token1 requested to borrow

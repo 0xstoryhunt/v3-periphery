@@ -4,5 +4,7 @@ pragma solidity =0.7.6;
 import '../base/PeripheryImmutableState.sol';
 
 contract PeripheryImmutableStateTest is PeripheryImmutableState {
-    constructor(address _factory, address _WIP9) PeripheryImmutableState(_factory, _WIP9) {}
+    constructor(address _deployer, address _factory, address _WIP9)
+        PeripheryImmutableState(_deployer, _factory, _WIP9)
+    {}
 }
