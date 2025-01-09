@@ -1,7 +1,7 @@
 import { Fixture } from 'ethereum-waffle'
 import { BigNumber, constants, Contract, ContractTransaction, Wallet } from 'ethers'
 import { waffle, ethers } from 'hardhat'
-import { IWETH9, MockTimeNonfungiblePositionManager, MockTimeSwapRouter, TestERC20 } from '../typechain'
+import { IWIP9, MockTimeNonfungiblePositionManager, MockTimeSwapRouter, TestERC20 } from '../typechain'
 import completeFixture from './shared/completeFixture'
 import { FeeAmount, TICK_SPACINGS } from './shared/constants'
 import { encodePriceSqrt } from './shared/encodePriceSqrt'
@@ -17,13 +17,13 @@ describe('SwapRouter', function () {
   let trader: Wallet
 
   const swapRouterFixture: Fixture<{
-    weth9: IWETH9
+    wip9: IWIP9
     factory: Contract
     router: MockTimeSwapRouter
     nft: MockTimeNonfungiblePositionManager
     tokens: [TestERC20, TestERC20, TestERC20]
   }> = async (wallets, provider) => {
-    const { weth9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
+    const { wip9, factory, router, tokens, nft } = await completeFixture(wallets, provider)
 
     // approve & fund wallets
     for (const token of tokens) {
@@ -34,7 +34,7 @@ describe('SwapRouter', function () {
     }
 
     return {
-      weth9,
+      wip9,
       factory,
       router,
       tokens,
@@ -43,14 +43,14 @@ describe('SwapRouter', function () {
   }
 
   let factory: Contract
-  let weth9: IWETH9
+  let wip9: IWIP9
   let router: MockTimeSwapRouter
   let nft: MockTimeNonfungiblePositionManager
   let tokens: [TestERC20, TestERC20, TestERC20]
   let getBalances: (
     who: string
   ) => Promise<{
-    weth9: BigNumber
+    wip9: BigNumber
     token0: BigNumber
     token1: BigNumber
     token2: BigNumber
@@ -63,19 +63,19 @@ describe('SwapRouter', function () {
     loadFixture = waffle.createFixtureLoader([wallet, trader])
   })
 
-  // helper for getting weth and token balances
+  // helper for getting wip and token balances
   beforeEach('load fixture', async () => {
-    ;({ router, weth9, factory, tokens, nft } = await loadFixture(swapRouterFixture))
+    ;({ router, wip9, factory, tokens, nft } = await loadFixture(swapRouterFixture))
 
     getBalances = async (who: string) => {
       const balances = await Promise.all([
-        weth9.balanceOf(who),
+        wip9.balanceOf(who),
         tokens[0].balanceOf(who),
         tokens[1].balanceOf(who),
         tokens[2].balanceOf(who),
       ])
       return {
-        weth9: balances[0],
+        wip9: balances[0],
         token0: balances[1],
         token1: balances[2],
         token2: balances[3],
@@ -125,10 +125,10 @@ describe('SwapRouter', function () {
       return nft.mint(liquidityParams)
     }
 
-    async function createPoolWETH9(tokenAddress: string) {
-      await weth9.deposit({ value: liquidity })
-      await weth9.approve(nft.address, constants.MaxUint256)
-      return createPool(weth9.address, tokenAddress)
+    async function createPoolWIP9(tokenAddress: string) {
+      await wip9.deposit({ value: liquidity })
+      await wip9.approve(nft.address, constants.MaxUint256)
+      return createPool(wip9.address, tokenAddress)
     }
 
     beforeEach('create 0-1 and 1-2 pools', async () => {
@@ -142,22 +142,22 @@ describe('SwapRouter', function () {
         amountIn: number = 3,
         amountOutMinimum: number = 1
       ): Promise<ContractTransaction> {
-        const inputIsWETH = weth9.address === tokens[0]
-        const outputIsWETH9 = tokens[tokens.length - 1] === weth9.address
+        const inputIsWIP = wip9.address === tokens[0]
+        const outputIsWIP9 = tokens[tokens.length - 1] === wip9.address
 
-        const value = inputIsWETH ? amountIn : 0
+        const value = inputIsWIP ? amountIn : 0
 
         const params = {
           path: encodePath(tokens, new Array(tokens.length - 1).fill(FeeAmount.MEDIUM)),
-          recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+          recipient: outputIsWIP9 ? constants.AddressZero : trader.address,
           deadline: 1,
           amountIn,
           amountOutMinimum,
         }
 
         const data = [router.interface.encodeFunctionData('exactInput', [params])]
-        if (outputIsWETH9)
-          data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOutMinimum, trader.address]))
+        if (outputIsWIP9)
+          data.push(router.interface.encodeFunctionData('unwrapWIP9', [amountOutMinimum, trader.address]))
 
         // ensure that the swap fails if the limit is any tighter
         params.amountOutMinimum += 1
@@ -277,21 +277,21 @@ describe('SwapRouter', function () {
         })
       })
 
-      describe('ETH input', () => {
-        describe('WETH9', () => {
+      describe('IP input', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await createPoolWIP9(tokens[0].address)
           })
 
-          it('WETH9 -> 0', async () => {
-            const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
+          it('WIP9 -> 0', async () => {
+            const pool = await factory.getPool(wip9.address, tokens[0].address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInput([weth9.address, tokens[0].address]))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactInput([wip9.address, tokens[0].address]))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 3)
 
             // get balances after
@@ -299,15 +299,15 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.add(3))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.add(3))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.sub(1))
           })
 
-          it('WETH9 -> 0 -> 1', async () => {
+          it('WIP9 -> 0 -> 1', async () => {
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInput([weth9.address, tokens[0].address, tokens[1].address], 5))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactInput([wip9.address, tokens[0].address, tokens[1].address], 5))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 5)
 
             const traderAfter = await getBalances(trader.address)
@@ -317,22 +317,22 @@ describe('SwapRouter', function () {
         })
       })
 
-      describe('ETH output', () => {
-        describe('WETH9', () => {
+      describe('IP output', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await createPoolWIP9(tokens[0].address)
+            await createPoolWIP9(tokens[1].address)
           })
 
-          it('0 -> WETH9', async () => {
-            const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
+          it('0 -> WIP9', async () => {
+            const pool = await factory.getPool(tokens[0].address, wip9.address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInput([tokens[0].address, weth9.address]))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactInput([tokens[0].address, wip9.address]))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -340,16 +340,16 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.sub(1))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.sub(1))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.add(3))
           })
 
-          it('0 -> 1 -> WETH9', async () => {
+          it('0 -> 1 -> WIP9', async () => {
             // get balances before
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInput([tokens[0].address, tokens[1].address, weth9.address], 5))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactInput([tokens[0].address, tokens[1].address, wip9.address], 5))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -369,10 +369,10 @@ describe('SwapRouter', function () {
         amountOutMinimum: number = 1,
         sqrtPriceLimitX96?: BigNumber
       ): Promise<ContractTransaction> {
-        const inputIsWETH = weth9.address === tokenIn
-        const outputIsWETH9 = tokenOut === weth9.address
+        const inputIsWIP = wip9.address === tokenIn
+        const outputIsWIP9 = tokenOut === wip9.address
 
-        const value = inputIsWETH ? amountIn : 0
+        const value = inputIsWIP ? amountIn : 0
 
         const params = {
           tokenIn,
@@ -382,15 +382,15 @@ describe('SwapRouter', function () {
             sqrtPriceLimitX96 ?? tokenIn.toLowerCase() < tokenOut.toLowerCase()
               ? BigNumber.from('4295128740')
               : BigNumber.from('1461446703485210103287273052203988822378723970341'),
-          recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+          recipient: outputIsWIP9 ? constants.AddressZero : trader.address,
           deadline: 1,
           amountIn,
           amountOutMinimum,
         }
 
         const data = [router.interface.encodeFunctionData('exactInputSingle', [params])]
-        if (outputIsWETH9)
-          data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOutMinimum, trader.address]))
+        if (outputIsWIP9)
+          data.push(router.interface.encodeFunctionData('unwrapWIP9', [amountOutMinimum, trader.address]))
 
         // ensure that the swap fails if the limit is any tighter
         params.amountOutMinimum += 1
@@ -443,21 +443,21 @@ describe('SwapRouter', function () {
         expect(poolAfter.token1).to.be.eq(poolBefore.token1.add(3))
       })
 
-      describe('ETH input', () => {
-        describe('WETH9', () => {
+      describe('IP input', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await createPoolWIP9(tokens[0].address)
           })
 
-          it('WETH9 -> 0', async () => {
-            const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
+          it('WIP9 -> 0', async () => {
+            const pool = await factory.getPool(wip9.address, tokens[0].address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInputSingle(weth9.address, tokens[0].address))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactInputSingle(wip9.address, tokens[0].address))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 3)
 
             // get balances after
@@ -465,28 +465,28 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.add(3))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.add(3))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.sub(1))
           })
         })
       })
 
-      describe('ETH output', () => {
-        describe('WETH9', () => {
+      describe('IP output', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await createPoolWIP9(tokens[0].address)
+            await createPoolWIP9(tokens[1].address)
           })
 
-          it('0 -> WETH9', async () => {
-            const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
+          it('0 -> WIP9', async () => {
+            const pool = await factory.getPool(tokens[0].address, wip9.address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactInputSingle(tokens[0].address, weth9.address))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactInputSingle(tokens[0].address, wip9.address))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -494,7 +494,7 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.sub(1))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.sub(1))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.add(3))
           })
         })
@@ -507,22 +507,22 @@ describe('SwapRouter', function () {
         amountOut: number = 1,
         amountInMaximum: number = 3
       ): Promise<ContractTransaction> {
-        const inputIsWETH9 = tokens[0] === weth9.address
-        const outputIsWETH9 = tokens[tokens.length - 1] === weth9.address
+        const inputIsWIP9 = tokens[0] === wip9.address
+        const outputIsWIP9 = tokens[tokens.length - 1] === wip9.address
 
-        const value = inputIsWETH9 ? amountInMaximum : 0
+        const value = inputIsWIP9 ? amountInMaximum : 0
 
         const params = {
           path: encodePath(tokens.slice().reverse(), new Array(tokens.length - 1).fill(FeeAmount.MEDIUM)),
-          recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+          recipient: outputIsWIP9 ? constants.AddressZero : trader.address,
           deadline: 1,
           amountOut,
           amountInMaximum,
         }
 
         const data = [router.interface.encodeFunctionData('exactOutput', [params])]
-        if (inputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [0, trader.address]))
-        if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOut, trader.address]))
+        if (inputIsWIP9) data.push(router.interface.encodeFunctionData('unwrapWIP9', [0, trader.address]))
+        if (outputIsWIP9) data.push(router.interface.encodeFunctionData('unwrapWIP9', [amountOut, trader.address]))
 
         // ensure that the swap fails if the limit is any tighter
         params.amountInMaximum -= 1
@@ -633,21 +633,21 @@ describe('SwapRouter', function () {
         })
       })
 
-      describe('ETH input', () => {
-        describe('WETH9', () => {
+      describe('IP input', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await createPoolWIP9(tokens[0].address)
           })
 
-          it('WETH9 -> 0', async () => {
-            const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
+          it('WIP9 -> 0', async () => {
+            const pool = await factory.getPool(wip9.address, tokens[0].address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutput([weth9.address, tokens[0].address]))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactOutput([wip9.address, tokens[0].address]))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 3)
 
             // get balances after
@@ -655,15 +655,15 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.add(3))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.add(3))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.sub(1))
           })
 
-          it('WETH9 -> 0 -> 1', async () => {
+          it('WIP9 -> 0 -> 1', async () => {
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutput([weth9.address, tokens[0].address, tokens[1].address], 1, 5))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactOutput([wip9.address, tokens[0].address, tokens[1].address], 1, 5))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 5)
 
             const traderAfter = await getBalances(trader.address)
@@ -673,22 +673,22 @@ describe('SwapRouter', function () {
         })
       })
 
-      describe('ETH output', () => {
-        describe('WETH9', () => {
+      describe('IP output', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await createPoolWIP9(tokens[0].address)
+            await createPoolWIP9(tokens[1].address)
           })
 
-          it('0 -> WETH9', async () => {
-            const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
+          it('0 -> WIP9', async () => {
+            const pool = await factory.getPool(tokens[0].address, wip9.address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutput([tokens[0].address, weth9.address]))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactOutput([tokens[0].address, wip9.address]))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -696,16 +696,16 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.sub(1))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.sub(1))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.add(3))
           })
 
-          it('0 -> 1 -> WETH9', async () => {
+          it('0 -> 1 -> WIP9', async () => {
             // get balances before
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutput([tokens[0].address, tokens[1].address, weth9.address], 1, 5))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactOutput([tokens[0].address, tokens[1].address, wip9.address], 1, 5))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -725,16 +725,16 @@ describe('SwapRouter', function () {
         amountInMaximum: number = 3,
         sqrtPriceLimitX96?: BigNumber
       ): Promise<ContractTransaction> {
-        const inputIsWETH9 = tokenIn === weth9.address
-        const outputIsWETH9 = tokenOut === weth9.address
+        const inputIsWIP9 = tokenIn === wip9.address
+        const outputIsWIP9 = tokenOut === wip9.address
 
-        const value = inputIsWETH9 ? amountInMaximum : 0
+        const value = inputIsWIP9 ? amountInMaximum : 0
 
         const params = {
           tokenIn,
           tokenOut,
           fee: FeeAmount.MEDIUM,
-          recipient: outputIsWETH9 ? constants.AddressZero : trader.address,
+          recipient: outputIsWIP9 ? constants.AddressZero : trader.address,
           deadline: 1,
           amountOut,
           amountInMaximum,
@@ -745,8 +745,8 @@ describe('SwapRouter', function () {
         }
 
         const data = [router.interface.encodeFunctionData('exactOutputSingle', [params])]
-        if (inputIsWETH9) data.push(router.interface.encodeFunctionData('refundETH'))
-        if (outputIsWETH9) data.push(router.interface.encodeFunctionData('unwrapWETH9', [amountOut, trader.address]))
+        if (inputIsWIP9) data.push(router.interface.encodeFunctionData('refundIP'))
+        if (outputIsWIP9) data.push(router.interface.encodeFunctionData('unwrapWIP9', [amountOut, trader.address]))
 
         // ensure that the swap fails if the limit is any tighter
         params.amountInMaximum -= 1
@@ -796,21 +796,21 @@ describe('SwapRouter', function () {
         expect(poolAfter.token1).to.be.eq(poolBefore.token1.add(3))
       })
 
-      describe('ETH input', () => {
-        describe('WETH9', () => {
+      describe('IP input', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
+            await createPoolWIP9(tokens[0].address)
           })
 
-          it('WETH9 -> 0', async () => {
-            const pool = await factory.getPool(weth9.address, tokens[0].address, FeeAmount.MEDIUM)
+          it('WIP9 -> 0', async () => {
+            const pool = await factory.getPool(wip9.address, tokens[0].address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutputSingle(weth9.address, tokens[0].address))
-              .to.emit(weth9, 'Deposit')
+            await expect(exactOutputSingle(wip9.address, tokens[0].address))
+              .to.emit(wip9, 'Deposit')
               .withArgs(router.address, 3)
 
             // get balances after
@@ -818,28 +818,28 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.add(1))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.add(3))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.add(3))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.sub(1))
           })
         })
       })
 
-      describe('ETH output', () => {
-        describe('WETH9', () => {
+      describe('IP output', () => {
+        describe('WIP9', () => {
           beforeEach(async () => {
-            await createPoolWETH9(tokens[0].address)
-            await createPoolWETH9(tokens[1].address)
+            await createPoolWIP9(tokens[0].address)
+            await createPoolWIP9(tokens[1].address)
           })
 
-          it('0 -> WETH9', async () => {
-            const pool = await factory.getPool(tokens[0].address, weth9.address, FeeAmount.MEDIUM)
+          it('0 -> WIP9', async () => {
+            const pool = await factory.getPool(tokens[0].address, wip9.address, FeeAmount.MEDIUM)
 
             // get balances before
             const poolBefore = await getBalances(pool)
             const traderBefore = await getBalances(trader.address)
 
-            await expect(exactOutputSingle(tokens[0].address, weth9.address))
-              .to.emit(weth9, 'Withdrawal')
+            await expect(exactOutputSingle(tokens[0].address, wip9.address))
+              .to.emit(wip9, 'Withdrawal')
               .withArgs(router.address, 1)
 
             // get balances after
@@ -847,7 +847,7 @@ describe('SwapRouter', function () {
             const traderAfter = await getBalances(trader.address)
 
             expect(traderAfter.token0).to.be.eq(traderBefore.token0.sub(3))
-            expect(poolAfter.weth9).to.be.eq(poolBefore.weth9.sub(1))
+            expect(poolAfter.wip9).to.be.eq(poolBefore.wip9.sub(1))
             expect(poolAfter.token0).to.be.eq(poolBefore.token0.add(3))
           })
         })
@@ -884,13 +884,13 @@ describe('SwapRouter', function () {
         expect(balance.eq(1)).to.be.eq(true)
       })
 
-      it('#unwrapWETH9WithFee', async () => {
+      it('#unwrapWIP9WithFee', async () => {
         const startBalance = await waffle.provider.getBalance(feeRecipient)
-        await createPoolWETH9(tokens[0].address)
+        await createPoolWIP9(tokens[0].address)
 
         const amountOutMinimum = 100
         const params = {
-          path: encodePath([tokens[0].address, weth9.address], [FeeAmount.MEDIUM]),
+          path: encodePath([tokens[0].address, wip9.address], [FeeAmount.MEDIUM]),
           recipient: router.address,
           deadline: 1,
           amountIn: 102,
@@ -899,7 +899,7 @@ describe('SwapRouter', function () {
 
         const data = [
           router.interface.encodeFunctionData('exactInput', [params]),
-          router.interface.encodeFunctionData('unwrapWETH9WithFee', [
+          router.interface.encodeFunctionData('unwrapWIP9WithFee', [
             amountOutMinimum,
             trader.address,
             100,

@@ -3,7 +3,7 @@ import { ethers } from 'hardhat'
 import { v3RouterFixture } from './externalFixtures'
 import { constants } from 'ethers'
 import {
-  IWETH9,
+  IWIP9,
   MockTimeNonfungiblePositionManager,
   MockTimeSwapRouter,
   NonfungibleTokenPositionDescriptor,
@@ -12,14 +12,14 @@ import {
 } from '../../typechain'
 
 const completeFixture: Fixture<{
-  weth9: IWETH9
+  wip9: IWIP9
   factory: IStoryHuntV3Factory
   router: MockTimeSwapRouter
   nft: MockTimeNonfungiblePositionManager
   nftDescriptor: NonfungibleTokenPositionDescriptor
   tokens: [TestERC20, TestERC20, TestERC20]
 }> = async ([wallet], provider) => {
-  const { weth9, factory, router } = await v3RouterFixture([wallet], provider)
+  const { wip9, factory, router } = await v3RouterFixture([wallet], provider)
 
   const tokenFactory = await ethers.getContractFactory('TestERC20')
   const tokens: [TestERC20, TestERC20, TestERC20] = [
@@ -37,21 +37,21 @@ const completeFixture: Fixture<{
   })
   const nftDescriptor = (await positionDescriptorFactory.deploy(
     tokens[0].address,
-    // 'ETH' as a bytes32 string
-    '0x4554480000000000000000000000000000000000000000000000000000000000'
+    // 'IP' as a bytes32 string
+    '0x4950000000000000000000000000000000000000000000000000000000000000'
   )) as NonfungibleTokenPositionDescriptor
 
   const positionManagerFactory = await ethers.getContractFactory('MockTimeNonfungiblePositionManager')
   const nft = (await positionManagerFactory.deploy(
     factory.address,
-    weth9.address,
+    wip9.address,
     nftDescriptor.address
   )) as MockTimeNonfungiblePositionManager
 
   tokens.sort((a, b) => (a.address.toLowerCase() < b.address.toLowerCase() ? -1 : 1))
 
   return {
-    weth9,
+    wip9,
     factory,
     router,
     tokens,
