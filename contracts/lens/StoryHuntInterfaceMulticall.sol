@@ -20,7 +20,7 @@ contract StoryHuntInterfaceMulticall {
         timestamp = block.timestamp;
     }
 
-    function getEthBalance(address addr) public view returns (uint256 balance) {
+    function getIpBalance(address addr) public view returns (uint256 balance) {
         balance = addr.balance;
     }
 
