@@ -1,18 +1,8 @@
-/**
- *Submitted for verification at Etherscan.io on 2021-04-29
-*/
-
-/**
- *Submitted for verification at Etherscan.io on 2021-03-23
-*/
-
-pragma solidity >=0.5.0;
+// SPDX-License-Identifier: GPL-2.0-or-later
+pragma solidity =0.7.6;
 pragma experimental ABIEncoderV2;
 
 /// @title Multicall2 - Aggregate results from multiple read-only function calls
-/// @author Michael Elliot <mike@makerdao.com>
-/// @author Joshua Levine <joshua@makerdao.com>
-/// @author Nick Johnson <arachnid@notdot.net>
 
 contract Multicall2 {
     struct Call {
