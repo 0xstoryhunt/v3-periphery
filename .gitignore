@@ -2,3 +2,7 @@ node_modules
 artifacts
 typechain
 cache
+cache_forge
+out
+broadcast
+.env
