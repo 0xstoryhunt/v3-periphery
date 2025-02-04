@@ -3,6 +3,7 @@ import "@nomiclabs/hardhat-waffle";
 import "hardhat-typechain";
 import "hardhat-watcher";
 import "@nomicfoundation/hardhat-verify";
+import "@nomicfoundation/hardhat-foundry";
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: "0.7.6",
